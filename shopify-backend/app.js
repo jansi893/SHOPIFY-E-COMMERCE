@@ -9,6 +9,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/address', addressRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 
 export default app;
