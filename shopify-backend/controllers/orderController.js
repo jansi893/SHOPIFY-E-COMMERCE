@@ -1,5 +1,29 @@
 import Order from '../models/Order.js';
 
+export const createOrder = async (req, res) => {
+    // Create a new order
+    const { items, totalAmount, shippingAddress , paymentMethod } = req.body;
+
+    if
+    (!items || items.length === 0) return res.status(400).json({ message: "No items in order" });
+
+    try {
+        const order = new Order({
+            user: req.user._id,
+            items,
+            totalAmount,
+            shippingAddress,
+            paymentMethod
+        });
+        const savedOrder = await order.save();
+        res.status(201).json(savedOrder);
+        
+    } catch (error) {
+        res.status(500).json({ message: "Error creating order", error: error.message });
+        
+    }
+}
+
 //get all orders (admin only)
 
 export const getAllOrders = async (req, res) => {
