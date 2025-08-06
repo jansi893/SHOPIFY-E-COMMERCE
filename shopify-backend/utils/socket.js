@@ -1,48 +1,50 @@
 import { Server } from "socket.io";
-import Chat from "../models/Chat.js";
+import Chat from "../models/Cart.js"
+let io;
 
+export const initSocket = (server) => {
+  io = new Server(server, {
+    cors: {
+      origin: process.env.CLIENT_URL, // You can restrict this to your frontend URL
+      methods: ["GET", "POST"],
+    },
+  });
 
-export const initSocket = (socket) => {
-    io = new Server(Server, {
-        cors: {
-            origin: "process.env.CLIENT_URL",
-            methods: ["GET", "POST"],
-        },
-    })
+  global.io = io; // make it globally accessible
 
-    global.io = io;
+  io.on("connection", (socket) => {
+    console.log("New user connected:", socket.id);
 
-    io.on("connection", (socket) => {
-        console.log("New user connected:", socket.id);
-        socket.on("joinRoom", (data) => {
-            const { role, userId } = data;
+    socket.on("joinRoom", (data) => {
+      const { role, userId } = data;
 
-            if (role === "admin") {
-                socket.join("admin");
-                console.log(`Admin joined room:, admin`);
+      if (role === "admin") {
+        socket.join("admin");
+        console.log(`Admin joined room: admin`)
+      } else {
+        socket.join(userId);
+        console.log(`User ${userId} joined room`);
+      }
+    });
 
-            } else {
-                socket.join(userId);
-                console.log(`User joined room:, ${userId}`);
-            }
+    socket.on("sendMessage", async ({ sender, receiver, message, orderId }) => {
+     try {
+        const chat = await Chat.create({ sender, receiver, message, orderId });
+        io.to(receiver).emit("receiveMessage", chat); // Real-time delivery to receiver
+      } catch (err) {
+        console.error("Error sending message:", err.message);
+      }
+    });
 
-        })
-        socket.on("sendMessage", async ({ sender, receiver, message, orderId }) => {
-            try {
-                const chat = await Chat.create({ sender, receiver, message, orderId })
-                io.to(receiver).emit("recieverMessage", chat);
-            }
-            catch (err) {
-                console.error("Error sending message", err.message);
-            }
-        })
-    })
-    return io;
-}
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
 
-export const getIo = () => {
-    if (!io) throw new Error("Socket not initialized");
-    return io;
-}
+  return io;
+};
 
-
+export const getIO = () => {
+  if (!io) throw new Error("Socket.io not initialized");
+  return io;
+};
