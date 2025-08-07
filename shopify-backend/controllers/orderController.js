@@ -3,15 +3,30 @@ import { emitNotification } from "../utils/emitNotification.js";
 import { sendOrderConfirmationEmail } from "../utils/emailSender.js";
 import Product from "../models/Product.js";
 import { getIO } from "../utils/socket.js";
+import { applyDiscountCodeInternally , markedCodeUsed } from "../utils/discountUtils.js";
 // Create a new order
 export const createOrder = async (req, res) => {
-  const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
+  const { items, shippingAddress, paymentMethod, totalAmount  , DiscountCode } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: "No order items" });
   }
 
   try {
+    if(DiscountCode){
+        const {discountPercentage , error} = await applyDiscountCodeInternally(DiscountCode, req.user._id)
+
+        if(error){
+            return res.status(400).json({ message: error })
+        }
+
+        const discountAmount = totalAmount * (discountPercentage / 100)
+        totalAmount = totalAmount - discountAmount
+
+        await markedCodeUsed(DiscountCode , req.user._id);
+    }
+
+
     const order = new Order({
       user: req.user._id,
       items,

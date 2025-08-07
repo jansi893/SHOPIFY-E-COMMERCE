@@ -10,6 +10,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import discountRoutes from './routes/discountRoutes.js';
 
 
 dotenv.config();
@@ -34,6 +35,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/address', addressRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/discounts', discountRoutes);
 
 
 export default app;
